@@ -3,82 +3,194 @@
 #include <fstream>
 #include <stack>
 #include <vector>
-std::vector<std::vector<int>> nums;
-int men = 0;
-bool isE = false;
-int shag(int plitkaI, int plitkaJ) {
-	int q = -men;
-	nums[plitkaI][plitkaJ] = men;
-	if (plitkaI != nums.size() - 1) {
-		if ((plitkaI > 0) and (!isE)) {
-			if (nums[plitkaI - 1][plitkaJ] == 0) {
-				q = shag(plitkaI - 1, plitkaJ);
-			}
-		}if ((plitkaJ > 0) and (!isE)) {
-			if (nums[plitkaI][plitkaJ - 1] == 0) {
-				q = shag(plitkaI, plitkaJ - 1);
-			}
-		}
-		if ((plitkaI < nums.size()-1) and (!isE)) {
-			if (nums[plitkaI + 1][plitkaJ] == 0) {
-				q = shag(plitkaI + 1, plitkaJ);
-			}
-		}
-		if ((plitkaJ < nums[0].size()-1) and (!isE)) {
-			if (nums[plitkaI][plitkaJ + 1] == 0) {
-				q = shag(plitkaI, plitkaJ + 1);
-			}
-		}
-	}
-	else isE = true;
-	return men;
-}
-int main() {
-	men = 2;
-	std::ifstream fin("in.txt");
-	std::ofstream fout("out.txt");
-	int sizeI;
-	int sizeJ; 
-	fin >> sizeI;
-	fin >> sizeJ;
-	nums.resize(sizeI, std::vector<int>(sizeJ));
-	std::string str = "0";
-	for (int i = 0; i < sizeI; i++) {
-		fin >> str;
-		for (int j = 0; j < sizeJ; j++) {
-			if (str[j] == '0') {
-				nums[i][j] = 0;
-			}
-			else nums[i][j] = 1;
-		}
-	}
-	std::vector<int> cExit;
-	for (int i = 0; i < sizeJ; i++) {
-		if (nums[0][i] == 0) {
-			cExit.push_back(i);
-		}
-	}
-	int plitkaI;
-	int plitkaJ;
-	for (int i = 0; i < cExit.size(); i++) {
-		plitkaI = 0;
-		plitkaJ = cExit[i];
-		
-		shag(plitkaI, plitkaJ);
 
-		isE = false;
-		men++;
+enum type { TOP, LEFT, BOT, RIGHT };
+using namespace std;
+bool** visited;
+int N, M;
+char** matrix;
+
+struct ELEM {
+	pair<int, int> pr;
+	type hand;
+};
+
+stack<ELEM> st;
+
+void dfs()
+{
+	while (!st.empty()) {
+		int i = st.top().pr.first;
+		int j = st.top().pr.second;
+		type side = st.top().hand;
+
+		if (i == N - 1)
+			return;
+
+		if (side == TOP) {
+			if (j > 0 && matrix[i][j - 1] == '0' && visited[i][j - 1] == false) {
+				visited[i][j - 1] = true;
+				ELEM temp;
+				temp.pr = make_pair(i, j - 1);
+				temp.hand = RIGHT;
+				st.push(temp);
+				continue;
+			}
+			if (i < N - 1 && matrix[i + 1][j] == '0' && visited[i + 1][j] == false) {
+				visited[i + 1][j] = true;
+				ELEM temp;
+				temp.pr = make_pair(i + 1, j);
+				temp.hand = TOP;
+				st.push(temp);
+				continue;
+			}
+			if (j < M - 1 && matrix[i][j + 1] == '0' && visited[i][j + 1] == false) {
+				visited[i][j + 1] = true;
+				ELEM temp;
+				temp.pr = make_pair(i, j + 1);
+				temp.hand = LEFT;
+				st.push(temp);
+				continue;
+			}
+		}
+		if (side == LEFT) {
+			if (i < N - 1 && matrix[i + 1][j] == '0' && visited[i + 1][j] == false) {
+				visited[i + 1][j] = true;
+				ELEM temp;
+				temp.pr = make_pair(i + 1, j);
+				temp.hand = TOP;
+				st.push(temp);
+				continue;
+			}
+			if (j < M - 1 && matrix[i][j + 1] == '0' && visited[i][j + 1] == false) {
+				visited[i][j + 1] = true;
+				ELEM temp;
+				temp.pr = make_pair(i, j + 1);
+				temp.hand = LEFT;
+				st.push(temp);
+				continue;
+			}
+			if (i > 0 && matrix[i - 1][j] == '0' && visited[i - 1][j] == false) {
+				visited[i - 1][j] = true;
+				ELEM temp;
+				temp.pr = make_pair(i - 1, j);
+				temp.hand = BOT;
+				st.push(temp);
+				continue;
+			}
+		}
+		if (side == RIGHT) {
+			if (i > 0 && matrix[i - 1][j] == '0' && visited[i - 1][j] == false) {
+				visited[i - 1][j] = true;
+				ELEM temp;
+				temp.pr = make_pair(i - 1, j);
+				temp.hand = BOT;
+				st.push(temp);
+				continue;
+			}
+			if (j > 0 && matrix[i][j - 1] == '0' && visited[i][j - 1] == false) {
+				visited[i][j - 1] = true;
+				ELEM temp;
+				temp.pr = make_pair(i, j - 1);
+				temp.hand = RIGHT;
+				st.push(temp);
+				continue;
+			}
+			if (i < N - 1 && matrix[i + 1][j] == '0' && visited[i + 1][j] == false) {
+				visited[i + 1][j] = true;
+				ELEM temp;
+				temp.pr = make_pair(i + 1, j);
+				temp.hand = TOP;
+				st.push(temp);
+				continue;
+			}
+		}
+		if (side == BOT) {
+			if (j < M - 1 && matrix[i][j + 1] == '0' && visited[i][j + 1] == false) {
+				visited[i][j + 1] = true;
+				ELEM temp;
+				temp.pr = make_pair(i, j + 1);
+				temp.hand = LEFT;
+				st.push(temp);
+				continue;
+			}
+			if (i > 0 && matrix[i - 1][j] == '0' && visited[i - 1][j] == false) {
+				visited[i - 1][j] = true;
+				ELEM temp;
+				temp.pr = make_pair(i - 1, j);
+				temp.hand = BOT;
+				st.push(temp);
+				continue;
+			}
+
+			if (j > 0 && matrix[i][j - 1] == '0' && visited[i][j - 1] == false) {
+				visited[i][j - 1] = true;
+				ELEM temp;
+				temp.pr = make_pair(i, j - 1);
+				temp.hand = RIGHT;
+				st.push(temp);
+				continue;
+			}
+		}
+
+		st.pop();
 	}
-	men = 2;
-	for (int i = 0; i < sizeJ; i++) {
-		if (nums[nums.size()-1][i] == men) {
-			men++;
+}
+
+int main() {
+
+	ifstream fin("in.txt");
+	ofstream fout("out.txt");
+	fin >> N >> M;
+	matrix = new char* [N];
+	for (int i = 0; i < N; i++)
+		matrix[i] = new char[M];
+	visited = new bool* [N];
+	for (int i = 0; i < N; i++)
+		visited[i] = new bool[M];
+	char c;
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < M; j++) {
+			fin >> c;
+			matrix[i][j] = c;
 		}
 	}
-	if (men == cExit.size()+2) {
-		fout << "Possible";
-		return 0;
-	}
-    fout << "Impossible";
+	for (int i = 0; i < N; i++)
+		for (int j = 0; j < M; j++)
+			visited[i][j] = false;
+
+	int count_enters = 0;
+	int count_exits = 0;
+
+	for (int j = 0; j < M; j++)
+		if (matrix[0][j] == '0')
+			count_enters++;
+	for (int j = 0; j < M; j++)
+		if (matrix[N - 1][j] == '0')
+			count_exits++;
+
+	for (int j = 0; j < M; j++)
+		if (matrix[0][j] == '0')
+			if (matrix[1][j] == '0' && visited[1][j] == false) {
+				visited[0][j] = true;
+				visited[1][j] = true;
+				ELEM temp;
+				temp.pr = make_pair(1, j);
+				temp.hand = TOP;
+				st.push(temp);
+				dfs();
+				while (!st.empty())
+					st.pop();
+			}
+
+	int real_exits = 0;
+	for (int i = 0; i < M; i++)
+		if (visited[N - 1][i] == true)
+			real_exits++;
+
+	if (real_exits == count_enters && real_exits <= count_exits)
+		fout << "Possible" << endl;
+	else
+		fout << "Impossible" << endl;
 	return 0;
 }
