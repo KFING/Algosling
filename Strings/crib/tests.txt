@@ -1,0 +1,14 @@
+11
+abacabadaba
+abacbadabaa
+ответ:
+Yes
+5 10
+****************
+5
+aabcd
+abadc
+ответ:
+No
+
+
